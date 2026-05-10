@@ -4,7 +4,7 @@ const qrcode = require("qrcode-terminal");
 const { google } = require("googleapis");
 
 // ================= CONFIG =================
-const SPREADSHEET_ID = "1H3Hlx6sosbgH5nWzNOt8WTwbTmt57cQfq-PilmTYMeU";
+const SPREADSHEET_ID = "16Rd7n84Lky9YOIqbpfiEVzT0_fiVZgT_924SqnZJAjY";
 
 // ================= GOOGLE SHEETS =================
 const auth = new google.auth.GoogleAuth({
@@ -61,6 +61,26 @@ function getJenisChoice(msg) {
   return null;
 }
 
+function getBahanChoice(msg) {
+  const choice = getMenuChoice(msg);
+
+  if (["1", "katun"].includes(choice)) return "Katun";
+  if (["2", "wol"].includes(choice)) return "Wol";
+  if (["3", "biasa"].includes(choice)) return "Biasa";
+
+  return null;
+}
+
+function getWarnaChoice(msg) {
+  const choice = getMenuChoice(msg);
+
+  if (["1", "hijau"].includes(choice)) return "Hijau";
+  if (["2", "merah"].includes(choice)) return "Merah";
+  if (["3", "ungu"].includes(choice)) return "Ungu";
+
+  return null;
+}
+
 function getUkuranChoice(msg) {
   const choice = (msg.selectedButtonId || msg.selectedRowId || msg.body || "")
     .trim()
@@ -96,29 +116,54 @@ function formatSummary(data) {
   ].join("\n");
 }
 
+const SERVICE_OPTIONS_TEXT =
+  "1\uFE0F\u20E3 \u{1F4DD} Deskripsi Baju\n2\uFE0F\u20E3 \u{1F6CD}\uFE0F Order Jasa";
+const JENIS_OPTIONS_TEXT =
+  "1\uFE0F\u20E3 \u{1F455} Kaos\n2\uFE0F\u20E3 \u{1F9E5} Hoodie\n3\uFE0F\u20E3 \u{1F454} Kemeja";
+const BAHAN_OPTIONS_TEXT =
+  "1\uFE0F\u20E3 \u{1F33F} Katun\n2\uFE0F\u20E3 \u{1F411} Wol\n3\uFE0F\u20E3 \u26AA Biasa";
+const WARNA_OPTIONS_TEXT =
+  "1\uFE0F\u20E3 \u{1F7E2} Hijau\n2\uFE0F\u20E3 \u{1F534} Merah\n3\uFE0F\u20E3 \u{1F7E3} Ungu";
+const UKURAN_OPTIONS_TEXT =
+  "1\uFE0F\u20E3 \u{1F4CF} S\n2\uFE0F\u20E3 \u{1F4CF} M\n3\uFE0F\u20E3 \u{1F4CF} L\n4\uFE0F\u20E3 \u{1F4CF} XL";
+const CONFIRMATION_OPTIONS_TEXT =
+  "1\uFE0F\u20E3 \u2705 YA\n2\uFE0F\u20E3 \u274C TIDAK";
+
 async function sendServiceMenu(replyTarget) {
   return replyTarget.reply(
-    "Halo, selamat datang.\n\nSilakan pilih layanan:\n1. Deskripsi Baju\n2. Order Jasa\n\nBalas dengan angka 1 atau 2."
+    `Halo, selamat datang.\n\nSilakan pilih layanan:\n${SERVICE_OPTIONS_TEXT}\n\nBalas dengan angka 1 atau 2.`,
   );
 }
 
 async function sendJenisMenu(replyTarget) {
   return replyTarget.reply(
-    "Pilih jenis baju:\n1. Kaos\n2. Hoodie\n3. Kemeja\n\nBalas dengan angka 1, 2, atau 3."
+    `Pilih jenis baju:\n${JENIS_OPTIONS_TEXT}\n\nBalas dengan angka 1, 2, atau 3.`,
+  );
+}
+
+async function sendBahanMenu(replyTarget) {
+  return replyTarget.reply(
+    `Pilih bahan:\n${BAHAN_OPTIONS_TEXT}\n\nBalas dengan angka 1, 2, atau 3.`,
+  );
+}
+
+async function sendWarnaMenu(replyTarget) {
+  return replyTarget.reply(
+    `Pilih warna:\n${WARNA_OPTIONS_TEXT}\n\nBalas dengan angka 1, 2, atau 3.`,
   );
 }
 
 async function sendUkuranMenu(replyTarget) {
   return replyTarget.reply(
-    "Pilih ukuran:\n1. S\n2. M\n3. L\n4. XL\n\nBalas dengan angka 1, 2, 3, atau 4."
+    `Pilih ukuran:\n${UKURAN_OPTIONS_TEXT}\n\nBalas dengan angka 1, 2, 3, atau 4.`,
   );
 }
 
 async function sendConfirmationMenu(replyTarget, data) {
   return replyTarget.reply(
     `Mohon cek data pesanan Anda:\n\n${formatSummary(
-      data
-    )}\n\nBalas YA untuk simpan pesanan.\nBalas TIDAK untuk batal.\nAnda juga bisa kirim 1 untuk YA dan 2 untuk TIDAK.`
+      data,
+    )}\n\nPilih konfirmasi:\n${CONFIRMATION_OPTIONS_TEXT}\n\nBalas YA/TIDAK atau angka 1/2.`,
   );
 }
 
@@ -186,7 +231,7 @@ client.on("message", async (msg) => {
 
     if (!service) {
       return msg.reply(
-        "Pilihan belum sesuai.\n\nSilakan pilih:\n1. Deskripsi Baju\n2. Order Jasa"
+        `Pilihan belum sesuai.\n\nSilakan pilih:\n${SERVICE_OPTIONS_TEXT}`,
       );
     }
 
@@ -199,7 +244,7 @@ client.on("message", async (msg) => {
   if (u.step === 2) {
     u.nama = text;
     u.step = 3;
-    return msg.reply("Silakan ketik nama produk.");
+    return msg.reply("Silakan ketik nama produk");
   }
 
   if (u.step === 3) {
@@ -213,23 +258,39 @@ client.on("message", async (msg) => {
 
     if (!jenis) {
       return msg.reply(
-        "Pilihan jenis belum sesuai.\n\nPilih salah satu:\n1. Kaos\n2. Hoodie\n3. Kemeja"
+        `Pilihan jenis belum sesuai.\n\nPilih salah satu:\n${JENIS_OPTIONS_TEXT}`,
       );
     }
 
     u.jenis = jenis;
     u.step = 5;
-    return msg.reply("Silakan ketik bahan.");
+    return sendBahanMenu(msg);
   }
 
   if (u.step === 5) {
-    u.bahan = text;
+    const bahan = getBahanChoice(msg);
+
+    if (!bahan) {
+      return msg.reply(
+        `Pilihan bahan belum sesuai.\n\nPilih salah satu:\n${BAHAN_OPTIONS_TEXT}`,
+      );
+    }
+
+    u.bahan = bahan;
     u.step = 6;
-    return msg.reply("Silakan ketik warna.");
+    return sendWarnaMenu(msg);
   }
 
   if (u.step === 6) {
-    u.warna = text;
+    const warna = getWarnaChoice(msg);
+
+    if (!warna) {
+      return msg.reply(
+        `Pilihan warna belum sesuai.\n\nPilih salah satu:\n${WARNA_OPTIONS_TEXT}`,
+      );
+    }
+
+    u.warna = warna;
     u.step = 7;
     return sendUkuranMenu(msg);
   }
@@ -239,7 +300,7 @@ client.on("message", async (msg) => {
 
     if (!ukuran) {
       return msg.reply(
-        "Pilihan ukuran belum sesuai.\n\nPilih salah satu:\n1. S\n2. M\n3. L\n4. XL"
+        `Pilihan ukuran belum sesuai.\n\nPilih salah satu:\n${UKURAN_OPTIONS_TEXT}`,
       );
     }
 
@@ -251,7 +312,9 @@ client.on("message", async (msg) => {
   if (u.step === 8) {
     u.deskripsi = text;
     u.step = 9;
-    return msg.reply("Silakan ketik catatan tambahan. Jika tidak ada, balas: -");
+    return msg.reply(
+      "Silakan ketik catatan tambahan. Jika tidak ada, balas: -",
+    );
   }
 
   if (u.step === 9) {
@@ -265,7 +328,10 @@ client.on("message", async (msg) => {
 
   if (u.step === 10) {
     const confirmation = getConfirmationChoice(msg);
-
+    const harga = 50000;
+    const admin = 2500;
+    const tax = harga * 0.1;
+    const total = harga + admin + tax;
     if (confirmation === "ya") {
       try {
         await saveToSheet([
@@ -287,19 +353,34 @@ client.on("message", async (msg) => {
         ]);
 
         await msg.reply(
-          "Pesanan berhasil disimpan.\n\nSilakan transfer ke:\nBCA xxxxxxxxxxxx\nRp 50.000\n\nSetelah transfer, kirim bukti pembayaran ya."
+          `Pesanan berhasil disimpan ✅
+
+🧾 *INVOICE PEMBAYARAN*
+
+Harga Produk : Rp ${harga.toLocaleString("id-ID")}
+Biaya Admin : Rp ${admin.toLocaleString("id-ID")}
+Tax (10%) : Rp ${tax.toLocaleString("id-ID")}
+-------------------------- +
+*Total Bayar : Rp ${total.toLocaleString("id-ID")}*
+
+Silakan transfer ke:
+🏦 BSI 7174124943
+
+Setelah transfer, kirim bukti pembayaran ya 🙏`,
         );
       } catch (error) {
         console.error("Gagal menyimpan ke Google Sheets:", error);
         return msg.reply(
-          "Konfirmasi sudah diterima, tetapi data gagal disimpan ke Google Sheets.\n\nSilakan cek `credentials.json`, akses spreadsheet, dan nama sheet `Sheet1`."
+          "Konfirmasi sudah diterima, tetapi data gagal disimpan ke Google Sheets.\n\nSilakan cek `credentials.json`, akses spreadsheet, dan nama sheet `Sheet1`.",
         );
       }
     } else if (confirmation === "tidak") {
-      await msg.reply("Pesanan dibatalkan. Jika ingin mulai lagi, silakan ketik menu.");
+      await msg.reply(
+        "Pesanan dibatalkan. Jika ingin mulai lagi, silakan ketik menu.",
+      );
     } else {
       return msg.reply(
-        "Balasan belum sesuai.\n\nBalas YA untuk simpan pesanan atau TIDAK untuk batal.\nAnda juga bisa kirim 1 untuk YA dan 2 untuk TIDAK."
+        `Balasan belum sesuai.\n\nPilih salah satu:\n${CONFIRMATION_OPTIONS_TEXT}\n\nBalas YA/TIDAK atau angka 1/2.`,
       );
     }
 
@@ -311,6 +392,6 @@ client.on("message", async (msg) => {
 client.initialize().catch((err) => {
   console.error("Gagal inisialisasi WhatsApp client:", err);
   console.error(
-    "Jika error masih sama, hapus folder .wwebjs_auth dan .wwebjs_cache lalu login ulang."
+    "Jika error masih sama, hapus folder .wwebjs_auth dan .wwebjs_cache lalu login ulang.",
   );
 });

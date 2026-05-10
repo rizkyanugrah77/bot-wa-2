@@ -16,5 +16,13 @@
     "googleapis": "^171.4.0",
     "qrcode-terminal": "^0.12.0",
     "whatsapp-web.js": "^1.34.7"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rizkyanugrah77/bot-wa-baju.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rizkyanugrah77/bot-wa-baju/issues"
+  },
+  "homepage": "https://github.com/rizkyanugrah77/bot-wa-baju#readme"
 }
