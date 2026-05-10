@@ -54,7 +54,7 @@ Sebelum menjalankan project, siapkan:
 ## Cara Clone Project
 
 ```bash
-git clone https://github.com/rizkyanugrah77/bot-wa-baju.git
+git clone https://github.com/username/repository.git
 cd bot-wa-baju
 ```
 
